@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Feed;
-
+use App\FeedItem;
+use App\Jobs\DeleteFeedItems;
+use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {
@@ -15,5 +17,18 @@ class IndexController extends Controller
         $feed_items = $feed->items()->paginate(5);
 
         return view('index', compact('feed', 'feed_items'));
+    }
+
+    public function deleteNews($feed_id, Request $request)
+    {
+        if($request->isMethod('delete')) {
+            $lists = FeedItem::where('feed_id', $feed_id)->pluck('id')->toArray();
+            $jobs = (new DeleteFeedItems($lists));
+            $this->dispatch($jobs);
+
+            return redirect('/')->with('status', 'NewsItems successful sent to delete.');
+        }
+
+        return abort(404);
     }
 }

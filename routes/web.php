@@ -12,3 +12,4 @@
 */
 
 Route::get('/', 'IndexController@execute', 'index');
+Route::delete('/delete/{feed_id}', 'IndexController@deleteNews');

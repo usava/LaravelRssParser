@@ -9,6 +9,13 @@
                     <h1>{{ $feed->title }}
                         <small>Last update: {{ $feed->updated_at->diffForHumans() }}</small>
                     </h1>
+                    <form action="/delete/{{$feed->id}}" method="POST" class="form-horizontal">
+                        {{ method_field('delete') }}
+                        {{ csrf_field() }}
+                        <input type="submit" class="btn btn-danger" value="Delete News Items">
+                    </form>
+
+
                 </div>
 
                 @forelse ($feed_items as $item)
