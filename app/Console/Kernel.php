@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use \App\Feed;
 
 class Kernel extends ConsoleKernel
 {
@@ -28,16 +29,23 @@ class Kernel extends ConsoleKernel
             $url = config('feedreader.breaking_news_url');
             $rss = \App\FeedReader::loadRss($url);
 
-            $feed = new \App\Feed();
+            $feed = new Feed();
             $feed->title = $rss->title;
             $feed->link = $url;
             $feed->description = $rss->description;
 
-            $feed = $feed->firstOrCreate($feed->toArray());
+            if($oldfeed = Feed::where('link', $feed->link)->first()){
+                unset($feed->link);
+                $oldfeed->update($feed->toArray());
+                $feed_id = $oldfeed->id;
+            }else{
+                $feed->save();
+                $feed_id = $feed->id;
+            }
 
             foreach($rss->item as $item){
                 $feed_item = new \App\FeedItem();
-                $feed_item->feed_id = $feed->id;
+                $feed_item->feed_id = $feed_id;
                 $feed_item->title = $item->title;
                 $feed_item->link = $item->link;
                 $feed_item->description = $item->description;
